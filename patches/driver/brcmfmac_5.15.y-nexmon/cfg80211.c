@@ -739,7 +739,8 @@ static struct wireless_dev *brcmf_cfg80211_add_iface(struct wiphy *wiphy,
 	case NL80211_IFTYPE_MESH_POINT:
 		return ERR_PTR(-EOPNOTSUPP);
 	case NL80211_IFTYPE_MONITOR:
-		return brcmf_mon_add_vif(wiphy, name, params);
+		wdev = brcmf_mon_add_vif(wiphy, name, params);
+		break;
 	case NL80211_IFTYPE_AP:
 		wdev = brcmf_ap_add_vif(wiphy, name, params);
 		break;
@@ -1051,6 +1052,11 @@ brcmf_cfg80211_change_iface(struct wiphy *wiphy, struct net_device *ndev,
 			  "Adhoc" : "Infra");
 	}
 	ndev->ieee80211_ptr->iftype = type;
+#ifdef NEXMON_MON_IF
+	if(type == NL80211_IFTYPE_MONITOR) {
+		ndev->type = ARPHRD_IEEE80211_RADIOTAP;
+	}
+#endif
 
 	brcmf_cfg80211_update_proto_addr_mode(&vif->wdev);
 

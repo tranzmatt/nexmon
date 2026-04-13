@@ -48,7 +48,6 @@
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #ifdef BUILD_ON_RPI
-#include <types.h> //not sure why it was removed, but it is needed for typedefs like `uint`
 #include <linux/if.h>
 #else
 #include <net/if.h>
@@ -60,6 +59,8 @@
 #include <wlcnt.h>
 
 #include <nexioctls.h>
+
+typedef uint32_t uint;
 
 #include <typedefs.h>
 #include <bcmwifi_channels.h>
@@ -84,6 +85,9 @@ extern int nex_ioctl(struct nexio *nexio, int cmd, void *buf, int len, bool set)
 extern struct nexio *nex_init_ioctl(const char *ifname);
 extern struct nexio *nex_init_udp(unsigned int securitycookie, unsigned int txip);
 extern struct nexio *nex_init_netlink(void);
+#ifdef USE_VENDOR_CMD
+extern struct nexio *nex_init_vendor_cmd(const char *ifname);
+#endif
 
 char            *ifname = "wlan0";
 unsigned char   set_monitor = 0;
@@ -346,6 +350,8 @@ main(int argc, char **argv)
     else
 #ifdef USE_NETLINK
         nexio = nex_init_netlink();
+#elif defined(USE_VENDOR_CMD)
+        nexio = nex_init_vendor_cmd(ifname);
 #else
         nexio = nex_init_ioctl(ifname);
 #endif
